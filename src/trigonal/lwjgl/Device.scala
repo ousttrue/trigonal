@@ -43,7 +43,7 @@ object Device{
         Mouse.destroy();
     }
 
-    def initialize() {
+    def initializeOpenGL() {
         GL11.glViewport(0, 0, Device.width, Device.height);
 
         GL11.glMatrixMode(GL11.GL_PROJECTION);

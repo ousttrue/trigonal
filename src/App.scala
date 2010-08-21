@@ -10,31 +10,32 @@ object App {
 
     def main(args :Array[String]){
 
+        // create window
         Device.create(800, 600, "test")
+        Device.initializeOpenGL()
         
-        val tmp=mutable.VertexArray()
-        tmp.addVertices(Array(
-                v(-1, -1, -1),
-                v( 1, -1, -1),
-                v( 1,  1, -1),
-                v(-1,  1, -1),
-                v(-1, -1,  1),
-                v( 1, -1,  1),
-                v( 1,  1,  1),
-                v(-1,  1,  1)
-                ))
-        tmp.addTriangles(
+        // create scene
+        val cube=immutable.VertexArray(Array(
+                    v(-1, -1, -1),
+                    v( 1, -1, -1),
+                    v( 1,  1, -1),
+                    v(-1,  1, -1),
+                    v(-1, -1,  1),
+                    v( 1, -1,  1),
+                    v( 1,  1,  1),
+                    v(-1,  1,  1)
+                ), 
                 Array(
-                new Quadrangle(0, 1, 2, 3),
-                new Quadrangle(5, 6, 2, 1),
-                new Quadrangle(6, 7, 3, 2),
-                new Quadrangle(7, 4, 0, 3),
-                new Quadrangle(4, 5, 1, 0),
-                new Quadrangle(5, 4, 7, 6)
-                ).flatMap(_.trianglate))
-        val cube=immutable.VertexArray(tmp.vertices, tmp.triangles)
+                    new Quadrangle(0, 1, 2, 3),
+                    new Quadrangle(5, 6, 2, 1),
+                    new Quadrangle(6, 7, 3, 2),
+                    new Quadrangle(7, 4, 0, 3),
+                    new Quadrangle(4, 5, 1, 0),
+                    new Quadrangle(5, 4, 7, 6)
+                    ).flatMap(_.trianglate)
+                )
 
-        Device.initialize()
+        // set callback
         Device.addKeyDownCallback(Keyboard.KEY_ESCAPE){
             ()=>Device.close()
         }
