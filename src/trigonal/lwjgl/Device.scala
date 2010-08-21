@@ -1,4 +1,4 @@
-package trigonal
+package trigonal.lwjgl
 
 import org.lwjgl.input.Controller;
 import org.lwjgl.input.Keyboard;
