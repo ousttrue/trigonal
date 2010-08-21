@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="JavaWithScala" default="compile">
+
+    <property name="src" value="src" />
+    <property name="classes" value="classes" />
+    <property name="scala.lib" value="T:/scala-2.8.0.final/lib/scala-library.jar" />
+    <property name="scala.compiler" value="T:/scala-2.8.0.final/lib/scala-compiler.jar" />
+    <property name="lwjgl" value="T:/java/lwjgl-2.5"/>
+
+    <target name="init">
+        <taskdef resource="scala/tools/ant/antlib.xml">
+            <classpath>
+                <pathelement location="${scala.lib}" />
+                <pathelement location="${scala.compiler}" />
+            </classpath>
+        </taskdef>
+    </target>
+
+    <target name="compile" depends="init">
+        <mkdir dir="${classes}"/>
+        <fsc srcdir="${src}"
+            destdir="${classes}">
+            <classpath>
+                <fileset dir="${lwjgl}/jar">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+        </fsc>
+        <javac srcdir="${src}" 
+            includeAntRuntime="no"
+            destdir="${classes}">
+            <classpath>
+                <pathelement path="${scala.lib}" />
+                <fileset dir="${lwjgl}/jar">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="run" depends="compile">
+        <java classname="App"
+            fork="true"
+            classpath="${classes}" >
+            <classpath>
+                <pathelement path="${scala.lib}" />
+                <fileset dir="${lwjgl}/jar">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+            <sysproperty key="java.library.path" value="${lwjgl}/native/windows"/>
+            <sysproperty key="user.language" value="ja"/>
+
+            <arg path="build.xml" />
+        </java>
+    </target>
+    <target name="clean">
+        <delete dir="${classes}"/>
+    </target>
+</project>
