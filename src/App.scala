@@ -2,6 +2,9 @@ import trigonal.lwjgl.Device
 import trigonal.scene.mutable.VertexArray
 import trigonal.geometry._
 
+import org.lwjgl.opengl.GL11
+import org.lwjgl.input.Keyboard;
+
 object App {
 
     def main(args :Array[String]){
@@ -29,12 +32,24 @@ object App {
                 new Quadrangle(5, 4, 7, 6)
                 ).flatMap(_.trianglate))
 
-        while(Device.isRunning){
-            Device.update()
+        Device.initialize()
 
+        Device.addKeyDownCallback(Keyboard.KEY_ESCAPE){
+            ()=>Device.close()
+        }
+
+        while(Device.isRunning){
+            // update frame
+            Device.keyDownDispatch()
+            cube.update()
+
+            // draw
+            Device.clear()
             cube.draw()
 
-            Device.wait(60)
+            // update
+            Device.update()
+            Device.sync(60)
         }
 
         Device.destroy()
