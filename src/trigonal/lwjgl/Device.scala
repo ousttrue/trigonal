@@ -58,17 +58,22 @@ object Device{
     }
 
     def initializeOpenGL() {
+        GL11.glEnable(GL11.GL_DEPTH_TEST)
+
         GL11.glViewport(0, 0, Device.width, Device.height);
 
         GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glLoadIdentity();
-        
+
         //GL11.glOrtho(0.0, Device.width, 0.0, Device.height, -100.0, 100.0);
         GLU.gluPerspective(30, 1, 1, 1000)
     }
 
     def clear(){
-        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT);
+        GL11.glClear(
+                GL11.GL_COLOR_BUFFER_BIT | 
+                GL11.GL_DEPTH_BUFFER_BIT |
+                GL11.GL_STENCIL_BUFFER_BIT);
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glLoadIdentity();
     }

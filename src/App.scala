@@ -39,10 +39,10 @@ object App {
         Device.addMouseCallback{
             // middle button
             case MouseDrag(2, dx, dy)=>
-                camera.shift(dx, dy)
+                camera.shift(-dx, -dy)
             // right button
             case MouseDrag(1, dx, dy)=>
-                camera.head(dx)
+                camera.head(-dx)
                 camera.pitch(dy)
             case MouseWheel(d)=>
                 camera.dolly(d)

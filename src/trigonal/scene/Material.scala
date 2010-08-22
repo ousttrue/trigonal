@@ -10,8 +10,6 @@ class Material(val name :String, val color :RGBA)
     */
     var isLoaded=false
 
-    println(this)
-
     override def toString :String="<Material "+name+" "+color+")"
 
     /*
