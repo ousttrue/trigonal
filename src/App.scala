@@ -30,7 +30,6 @@ object App {
 
         // create camera
         val camera=new scene.Camera(800)
-        root.add(camera)
 
         // set callback
         Device.addKeyboardCallback{
