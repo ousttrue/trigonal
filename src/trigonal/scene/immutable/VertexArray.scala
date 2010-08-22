@@ -1,5 +1,6 @@
 package trigonal.scene.immutable
 import trigonal.scene.Node
+import trigonal.scene.Material
 import trigonal.geometry._
 import org.lwjgl.opengl.GL11
 import org.lwjgl.BufferUtils
@@ -41,8 +42,11 @@ object IndexedVertexArray {
     }
 }
 
-class VertexArray ( val positions :java.nio.FloatBuffer )
-    extends Node
+class VertexArray ( 
+        val positions :java.nio.FloatBuffer, 
+        val material :Option[Material]
+        )
+extends Node
 {
     val vertexCount=positions.capacity/3
 
@@ -50,15 +54,24 @@ class VertexArray ( val positions :java.nio.FloatBuffer )
     }
 
     override def drawSelf(){
+        material match {
+            case Some(m)=>m.begin()
+            case None=>"no material"
+        }
         GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY)
         GL11.glVertexPointer(3, 0, positions)
         GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vertexCount)
         GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY)
+        material match {
+            case Some(m)=>m.end()
+            case None=>"no material"
+        }
     }
 }
 
 object VertexArray {
-    def apply(vertices :Seq[Vector3]) :VertexArray={
+    def apply(vertices :Seq[Vector3], material :Option[Material]) 
+        :VertexArray={
         val positions=BufferUtils.createFloatBuffer(vertices.length*3)
         for(v <- vertices){
             positions.put(v.x)
@@ -66,7 +79,7 @@ object VertexArray {
             positions.put(v.z)
         }
         positions.rewind()
-        new VertexArray(positions)
+        new VertexArray(positions, material)
     }
 }
 

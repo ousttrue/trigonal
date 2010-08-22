@@ -17,7 +17,7 @@ object App {
         // load scene
         val root=new scene.Empty()
         for(arg <- args){
-            print("load: "+arg+"...")
+            println("load: "+arg+"...")
             val loader=new trigonal.loader.mqo.Loader()
             if(loader.load(arg)){
                 root.add(trigonal.loader.mqo.Builder.createVertexArray(loader))

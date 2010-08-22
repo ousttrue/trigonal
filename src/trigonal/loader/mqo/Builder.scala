@@ -1,16 +1,22 @@
 package trigonal.loader.mqo
+
 import trigonal.scene
 import trigonal.geometry._
 import scala.collection.mutable.ArrayBuffer
 
-
 object Builder {
     def createVertexArray(loader :trigonal.loader.mqo.Loader) :scene.Node={
-        // create vertex buffer for each material
-        val verticesEachMaterial=loader.materials.map(
-                _ => ArrayBuffer[Vector3]())
+        // create materials 
+        val materials=loader.materials.map{
+            m => Some(new scene.Material(m.name, m.color)) :Option[scene.Material]
+        }
+        // create vertex buffers
+        val verticesEachMaterial=loader.materials.map{
+            _ => ArrayBuffer[Vector3]()
+        }
         if(verticesEachMaterial.isEmpty){
             // fail safe
+            materials.append(None)
             verticesEachMaterial.append(ArrayBuffer[Vector3]())
         }
         // distribute vertices to materials
@@ -21,9 +27,9 @@ object Builder {
         }
         // create VertexArray for each material
         val top=new scene.Empty()
-        for((vertices, material_index) <- verticesEachMaterial.zipWithIndex;
+        for((vertices, material) <- verticesEachMaterial.zip(materials);
                 if vertices.length>0){
-            top.add(scene.immutable.VertexArray(vertices))
+            top.add(scene.immutable.VertexArray(vertices, material))
         }
 
         top

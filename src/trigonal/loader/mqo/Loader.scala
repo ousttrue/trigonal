@@ -17,19 +17,19 @@ class Material(var name :String) {
     var specular=0.0
     var power=5.0
     var useVertexColor=0
-    var diffuseTexture=""
-    var alphaTexture=""
+    var diffuseTexture :Option[String]=None
+    var alphaTexture :Option[String]=None
 
     override def toString() :String={
         "<Material"+
         color+
         ">"
-    } 
+    }
 }
 
 object Material {
-    val materialLine="""^\s"([^"]+)"(.*)$""".r
-    val paramsPattern="""^\s*(\w+)\(([^)]+)\)$""".r
+    val materialLine="""^\s*"([^"]+)"(.*)$""".r
+    val paramsPattern="""\s*(\w+)\(([^)]+)\)""".r
 
     def parse(line: String) :Material={
         line match {
@@ -37,7 +37,7 @@ object Material {
                 val material=new Material(name)
                 paramsPattern.findAllIn(params).matchData.foreach(m => {
                         m.group(1) match {
-                        case "col" => 
+                        case "col" =>
                         val t=m.group(2).split(" ")
                         material.color=RGBA(t(0), t(1), t(2), t(3))
                         case "shader" => material.shader=m.group(2) toInt
@@ -47,8 +47,10 @@ object Material {
                         case "spc" => material.specular=m.group(2) toFloat
                         case "power" => material.power=m.group(2) toFloat
                         case "vcol" => material.useVertexColor=m.group(2) toInt
-                        case "aplane" => material.alphaTexture=m.group(2)
-                        case "tex" => material.diffuseTexture=m.group(2)
+                        case "aplane" => material.alphaTexture=Some(
+                            m.group(2).slice(1, m.group(2).length-1))
+                        case "tex" => material.diffuseTexture=Some(
+                            m.group(2).slice(1, m.group(2).length-1))
                         }
                 })
                 return material
@@ -59,89 +61,42 @@ object Material {
 ///////////////////////////////////////////////////////////////////////////////
 // Face
 ///////////////////////////////////////////////////////////////////////////////
-object Line {
-    def parse(params :String) :Line={
-        var line=new Line
-        for(param <- params.split(')')){
-            val tokens=param.trim.split(Array('(', ' '))
-            tokens match {
-                case Array("V", i0, i1)=>
-                    line=new Line(i0 toInt, i1 toInt, line)
-                case Array("M", m)=>
-                    line.material=m.toInt
-                case Array("UV", u0, v0, u1, v1)=>
-                    line.uv(0)=Vector2(u0, v0)
-                    line.uv(1)=Vector2(u1, v1)
-                case Array("COL", c0, c1, c2)=>
-                    line;
-            }
-        }
-        return line
-    }
-}
-
-object Triangle {
-    def parse(params :String) :Triangle={
-        var triangle=new Triangle
-        for(param <- params.split(')')){
-            val tokens=param.trim.split(Array('(', ' '))
-            tokens match {
-                case Array("V", i0, i1, i2)=>
-                    triangle=new Triangle(
-                            i0 toInt, i1 toInt, i2 toInt, triangle)
-                case Array("M", m)=>
-                    triangle.material=m.toInt
-                case Array("UV", u0, v0, u1, v1, u2, v2)=>
-                    triangle.uv(0)=Vector2(u0, v0)
-                    triangle.uv(1)=Vector2(u1, v1)
-                    triangle.uv(2)=Vector2(u2, v2)
-                case Array("COL", c0, c1, c2)=>
-                    triangle;
-            }
-        }
-        return triangle
-    }
-}
-
-object Quadrangle {
-    def parse(params :String) :Quadrangle={
-        var quadrangle=new Quadrangle
-        for(param <- params.split(')')){
-            val tokens=param.trim.split(Array('(', ' '))
-            tokens match {
-                case Array("V", i0, i1, i2, i3)=>
-                    quadrangle=new Quadrangle(
-                            i0 toInt, i1 toInt, i2 toInt, i3 toInt, quadrangle)
-                case Array("M", m)=>
-                    quadrangle.material=m.toInt
-                case Array("UV", u0, v0, u1, v1, u2, v2, u3, v3)=>
-                    quadrangle.uv(0)=Vector2(u0, v0)
-                    quadrangle.uv(1)=Vector2(u1, v1)
-                    quadrangle.uv(2)=Vector2(u2, v2)
-                    quadrangle.uv(3)=Vector2(u3, v3)
-                case Array("COL", c0, c1, c2, c3)=>
-                    quadrangle;
-            }
-        }
-        return quadrangle
-    }
-}
-
 object Face {
     val faceLine="""^\s*(\d+)(.*)$""".r
+
+    private def parseParams_(count :Int, params :String) 
+    :(Array[Int], Int, Array[Float])={
+        var indices =new Array[Int](count)
+        var material=0
+        var uvs =new Array[Float](count*2)
+        for(param <- params.split(')')){
+            val tokens=param.trim.split(Array('(', ' '))
+            tokens match {
+                case Array("M", m@_*)=> material=m(0) toInt
+                case Array("V", i@_*)=> indices=(i.map(_ toInt)).toArray
+                case Array("UV", uv@_*)=> uvs=(uv.map(_ toFloat)).toArray
+                case Array("COL", c@_*)=> 0
+                case _=> 0
+            }
+        }
+        return (indices, material, uvs)
+    }
 
     def parse(line: String) :Face={
         line match {
             case faceLine(count, params) =>
-                count match {
-                    case "2" => return Line.parse(params)
-                    case "3" => return Triangle.parse(params)
-                    case "4" => return Quadrangle.parse(params)
+                val (indices, material, uvs)=parseParams_(count toInt, params)
+                val face=indices.length match {
+                    case 2=> new Line(indices, uvs)
+                    case 3=> new Triangle(indices, uvs)
+                    case 4=> new Quadrangle(indices, uvs)
                 }
+                face.material=material
+                return face
         }
     }
 }
-                
+
 ///////////////////////////////////////////////////////////////////////////////
 // Object
 ///////////////////////////////////////////////////////////////////////////////
@@ -183,7 +138,7 @@ object Object{
                 case Array("folding", value) => obj.folding=value toInt
                 case Array("scale", x, y, z) => obj.scale=Vector3(x, y, z)
                 case Array("rotation", x, y, z) => obj.rotation=Vector3(x, y, z)
-                case Array("translation", x, y, z) => 
+                case Array("translation", x, y, z) =>
                 obj.translation=Vector3(x, y, z)
                 case Array("visible", value)=> obj.visible=value toInt
                 case Array("locking", value)=> obj.locking=value toInt
@@ -191,10 +146,11 @@ object Object{
                 case Array("facet", value)=> obj.facet=value toFloat
                 case Array("color", r, g, b)=> obj.color=RGBA(r, g, b, "1")
                 case Array("color_type", value)=> obj.color_type=value toInt
-                case Array("vertex", count, "{")=> 
+                case Array("vertex", count, "{")=>
                 Object.parseVertices(obj, iter, count toInt)
-                case Array("face", count, "{")=> 
+                case Array("face", count, "{")=>
                 Object.parseFaces(obj, iter, count toInt)
+                case _ => println("unknown key:", tokens(0))
             }
         }
         return null
@@ -225,10 +181,11 @@ object Object{
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Loader
+// Mqo Loader
 ///////////////////////////////////////////////////////////////////////////////
 class Loader {
 
+    var path=""
     var pos=Vector3(0, 0, 0)
     var lookat=Vector3(0, 0, 0)
     var head=0.0
@@ -240,7 +197,7 @@ class Loader {
     val objects=new ArrayBuffer[Object]
 
     override def toString() :String={
-        "<Loader"+
+        "<mqo.Loader"+
         " materials: "+materials.size+
         ", objects: "+objects.size+"\n"+
         (for(o <- objects)yield o.toString).mkString("\n") +
@@ -275,9 +232,11 @@ class Loader {
         }
     }
 
-    def load(path :String):Boolean={
+    def load(src :java.io.File):Boolean=load(src toString)
+    def load(src :String):Boolean={
+        path=src
         try{
-            val iter=Source.fromFile(path).getLines
+            val iter=Source.fromFile(path, "shift-jis").getLines
             // check first line
             if(iter.next!="Metasequoia Document"){
                 return false
@@ -289,13 +248,14 @@ class Loader {
             // each line
             val materialChunk="""Material (\d+) \{""".r
             val objectChunk="""^Object "([^"]+)" \{""".r
-            for(line <- iter if line!=""){
-                line match {
+            while(iter.hasNext){
+                iter.next match {
+                    case "" => 0
                     case "Eof" => return true
                     case "Scene {" => _parseScene(iter)
                     case materialChunk(count) => _parseMaterials(
                             iter, count toInt)
-                    case objectChunk(name) => 
+                    case objectChunk(name) =>
                         objects.append(Object.parse(name, iter))
                     case default => println("unknown chunk:", default)
                 }
@@ -314,7 +274,7 @@ object Loader {
     def main(args :Array[String]){
         for(arg <- args){
             println("load: "+arg)
-            val loader=new Loader()
+            val loader=new Loader
             if(loader.load(arg)){
                 println(loader)
             }

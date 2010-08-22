@@ -33,7 +33,9 @@ object Vector3 {
 /**
  * color
  */
-class RGBA(val r :Float, val g :Float, val b :Float, val a :Float)
+class RGBA(val r :Float, val g :Float, val b :Float, val a :Float){
+    override def toString="<RGBA %f:%f:%f:%f>".format(r, g, b, a)
+}
 object RGBA {
     def apply(r :Float, g :Float, b :Float, a :Float) :RGBA=new RGBA(r, g, b, a)
     def apply(
@@ -55,6 +57,11 @@ abstract class Face{
 
 class Line(val i0 :Int, val i1 :Int) extends Face {
     def this()=this(0, 0)
+    def this(indices :Seq[Int], uvs :Seq[Float])={
+        this(indices(0), indices(1))
+        uv(0)=Vector2(uvs(0), uvs(1))
+        uv(1)=Vector2(uvs(2), uvs(3))
+    }
     def this(i0 :Int, i1 :Int, src :Line)={
         this(i0, i1)
         uv(0)==src.uv(0)
@@ -68,6 +75,12 @@ class Line(val i0 :Int, val i1 :Int) extends Face {
 class Triangle(val i0 :Int, val i1 :Int, val i2 :Int) 
 extends Face {
     def this()=this(0, 0, 0)
+    def this(indices :Seq[Int], uvs :Seq[Float])={
+        this(indices(0), indices(1), indices(2))
+        uv(0)=Vector2(uvs(0), uvs(1))
+        uv(1)=Vector2(uvs(2), uvs(3))
+        uv(2)=Vector2(uvs(4), uvs(5))
+    }
     def this(i0 :Int, i1 :Int, i2 :Int, src :Triangle)={
         this(i0, i1, i2)
         uv(0)==src.uv(0)
@@ -82,6 +95,13 @@ extends Face {
 class Quadrangle(val i0 :Int, val i1 :Int, val i2 :Int, val i3 :Int) 
 extends Face {
     def this()=this(0, 0, 0, 0)
+    def this(indices :Seq[Int], uvs :Seq[Float])={
+        this(indices(0), indices(1), indices(2), indices(3))
+        uv(0)=Vector2(uvs(0), uvs(1))
+        uv(1)=Vector2(uvs(2), uvs(3))
+        uv(2)=Vector2(uvs(4), uvs(5))
+        uv(3)=Vector2(uvs(6), uvs(7))
+    }
     def this(i0 :Int, i1 :Int, i2 :Int, i3 :Int, src :Quadrangle)={
         this(i0, i1, i2, i3)
         uv(0)==src.uv(0)
