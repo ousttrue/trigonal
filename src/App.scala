@@ -1,37 +1,11 @@
 import trigonal.lwjgl.Device
 import trigonal.scene
-
 import trigonal.geometry._
-import scala.collection.mutable.ArrayBuffer
 
 import org.lwjgl.opengl.GL11
 import org.lwjgl.input.Keyboard;
 
 object App {
-
-    def createVertexArray(loader :trigonal.loader.mqo.Loader) :scene.Node={
-
-        val verticesEachMaterial=loader.materials.map(
-                _ => ArrayBuffer[Vector3]())
-        if(verticesEachMaterial.isEmpty){
-            // fail safe
-            verticesEachMaterial.append(ArrayBuffer[Vector3]())
-        }
-
-        for(o <- loader.objects; f <- o.faces; t <- f.trianglate){
-            verticesEachMaterial(f.material).append(o.vertices(t.i0))
-            verticesEachMaterial(f.material).append(o.vertices(t.i1))
-            verticesEachMaterial(f.material).append(o.vertices(t.i2))
-        }
-
-        val top=new scene.Empty()
-        for((vertices, material_index) <- verticesEachMaterial.zipWithIndex;
-                if vertices.length>0){
-            top.add(scene.immutable.VertexArray(vertices))
-        }
-
-        top
-    }
 
     def main(args :Array[String]){
 
@@ -45,7 +19,7 @@ object App {
             print("load: "+arg+"...")
             val loader=new trigonal.loader.mqo.Loader()
             if(loader.load(arg)){
-                root.add(createVertexArray(loader))
+                root.add(trigonal.loader.mqo.Builder.createVertexArray(loader))
                 println("success")
             }
             else{
