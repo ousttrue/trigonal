@@ -28,6 +28,12 @@ class Camera(var distance :Float) extends Node {
     }
 
     def dolly(d :Int){
+        if(d>0){
+            distance*=0.9f
+        }
+        else if(d<0){
+            distance*=1.1f
+        }
     }
 }
 
