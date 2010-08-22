@@ -1,6 +1,9 @@
 import trigonal.lwjgl.Device
+import trigonal.lwjgl.KeyboardEvent
+import trigonal.lwjgl.MouseEvent
+import trigonal.lwjgl.MouseDrag
+import trigonal.lwjgl.MouseWheel
 import trigonal.scene
-import trigonal.geometry._
 
 import org.lwjgl.opengl.GL11
 import org.lwjgl.input.Keyboard;
@@ -28,21 +31,30 @@ object App {
         }
 
         // create camera
-        val camera=new scene.Camera(Vector3(0, 0, -800))
+        val camera=new scene.Camera(800)
         root.add(camera)
 
         // set callback
-        Device.addKeyDownCallback(Keyboard.KEY_ESCAPE){
-            ()=>Device.close()
+        Device.addKeyboardCallback{
+            case KeyboardEvent(Keyboard.KEY_ESCAPE, true)=>Device.close()
+            case KeyboardEvent(Keyboard.KEY_Q, true)=>Device.close()
         }
-        Device.addKeyDownCallback(Keyboard.KEY_Q){
-            ()=>Device.close()
+        Device.addMouseCallback{
+            // middle button
+            case MouseDrag(2, dx, dy)=>
+                camera.shift(dx, dy)
+            // right button
+            case MouseDrag(1, dx, dy)=>
+                camera.head(dx)
+                camera.pitch(dy)
+            case MouseWheel(d)=>
+                camera.dolly(d)
         }
 
         // main loop
         while(Device.isRunning){
             // update frame
-            Device.keyDownDispatch()
+            Device.dispatch()
             root.update()
 
             // draw

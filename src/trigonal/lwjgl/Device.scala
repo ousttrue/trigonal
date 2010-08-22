@@ -1,4 +1,5 @@
 package trigonal.lwjgl
+import scala.collection.mutable.ArrayBuffer
 
 import org.lwjgl.input.Controller;
 import org.lwjgl.input.Keyboard;
@@ -8,10 +9,23 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 
+case class KeyboardEvent(val keyCode :Int, val isDown :Boolean)
+abstract class MouseEvent
+case class MouseDrag(val button :Int, val dx :Int, val dy :Int) extends MouseEvent
+case class MouseWheel(val d :Int) extends MouseEvent
+
 object Device{
 
     var isClose=false
-    val keyDownMap=scala.collection.mutable.Map[Int, ()=>Unit]()
+    val keyboardCallbacks=ArrayBuffer[PartialFunction[KeyboardEvent, Unit]]()
+    val mouseCallbacks=ArrayBuffer[PartialFunction[MouseEvent, Unit]]()
+
+    // mouse status
+    var mouse0=false
+    var mouse1=false
+    var mouse2=false
+    var mouse_x=0
+    var mouse_y=0
 
     def isRunning= !isClose && !Display.isCloseRequested
     def isActive=Display.isActive
@@ -59,15 +73,57 @@ object Device{
         GL11.glLoadIdentity();
     }
 
-    def addKeyDownCallback(keyCode :Int)(f : ()=>Unit){
-        keyDownMap+=(keyCode -> f)
+    def addKeyboardCallback(f :PartialFunction[KeyboardEvent, Unit]){
+        keyboardCallbacks.append(f)
     }
 
-    def keyDownDispatch(){
-        for((keyCode, f) <- keyDownMap){
-            if(Keyboard.isKeyDown(keyCode)){
-                f()
+    def addMouseCallback(f :PartialFunction[MouseEvent, Unit]){
+        mouseCallbacks.append(f)
+    }
+
+    private def dispatchMouse(event :MouseEvent){
+        for(f <- mouseCallbacks; if f.isDefinedAt(event)){
+            f.apply(event)
+        }
+    }
+
+    def dispatch(){
+        // keyboard
+        while(Keyboard.next()){
+            val event=KeyboardEvent(
+                    Keyboard.getEventKey, Keyboard.getEventKeyState)
+            for(f <- keyboardCallbacks; if f.isDefinedAt(event)){
+                f.apply(event)
             }
+        }
+        // mouse
+        while(Mouse.next()){
+           Mouse.getEventButton match {
+               case 0=> 
+                   mouse0=Mouse.getEventButtonState
+               case 1=> 
+                    mouse1=Mouse.getEventButtonState
+               case 2=> 
+                   mouse2=Mouse.getEventButtonState
+               case _=> 
+                   val x=Mouse.getEventX()
+                   val y=Mouse.getEventY()
+                   if(mouse0){
+                       dispatchMouse(MouseDrag(0, mouse_x-x, mouse_y-y))
+                   }
+                   if(mouse1){
+                       dispatchMouse(MouseDrag(1, mouse_x-x, mouse_y-y))
+                   }
+                   if(mouse2){
+                       dispatchMouse(MouseDrag(2, mouse_x-x, mouse_y-y))
+                   }
+                   val d=Mouse.getDWheel()
+                   if(d!=0){
+                       dispatchMouse(MouseWheel(d))
+                   }
+                   mouse_x=x
+                   mouse_y=y
+           }
         }
     }
 }
