@@ -50,7 +50,7 @@ object Device{
         GL11.glLoadIdentity();
         
         //GL11.glOrtho(0.0, Device.width, 0.0, Device.height, -100.0, 100.0);
-        GLU.gluPerspective(30, 1, 1, 100)
+        GLU.gluPerspective(30, 1, 1, 1000)
     }
 
     def clear(){

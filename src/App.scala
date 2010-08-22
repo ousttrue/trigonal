@@ -1,39 +1,61 @@
 import trigonal.lwjgl.Device
-import trigonal.scene.mutable
-import trigonal.scene.immutable
+import trigonal.scene
+
 import trigonal.geometry._
+import scala.collection.mutable.ArrayBuffer
 
 import org.lwjgl.opengl.GL11
 import org.lwjgl.input.Keyboard;
 
 object App {
 
+    def createVertexArray(loader :trigonal.loader.mqo.Loader) :scene.Node={
+
+        val verticesEachMaterial=loader.materials.map(
+                _ => ArrayBuffer[Vector3]())
+        if(verticesEachMaterial.isEmpty){
+            // fail safe
+            verticesEachMaterial.append(ArrayBuffer[Vector3]())
+        }
+
+        for(o <- loader.objects; f <- o.faces; t <- f.trianglate){
+            verticesEachMaterial(f.material).append(o.vertices(t.i0))
+            verticesEachMaterial(f.material).append(o.vertices(t.i1))
+            verticesEachMaterial(f.material).append(o.vertices(t.i2))
+        }
+
+        val top=new scene.Empty()
+        for((vertices, material_index) <- verticesEachMaterial.zipWithIndex;
+                if vertices.length>0){
+            top.add(scene.immutable.VertexArray(vertices))
+        }
+
+        top
+    }
+
     def main(args :Array[String]){
 
         // create window
         Device.create(800, 600, "test")
         Device.initializeOpenGL()
-        
-        // create scene
-        val cube=immutable.VertexArray(Array(
-                    v(-1, -1, -1),
-                    v( 1, -1, -1),
-                    v( 1,  1, -1),
-                    v(-1,  1, -1),
-                    v(-1, -1,  1),
-                    v( 1, -1,  1),
-                    v( 1,  1,  1),
-                    v(-1,  1,  1)
-                ), 
-                Array(
-                    new Quadrangle(0, 1, 2, 3),
-                    new Quadrangle(5, 6, 2, 1),
-                    new Quadrangle(6, 7, 3, 2),
-                    new Quadrangle(7, 4, 0, 3),
-                    new Quadrangle(4, 5, 1, 0),
-                    new Quadrangle(5, 4, 7, 6)
-                    ).flatMap(_.trianglate)
-                )
+
+        // load scene
+        val root=new scene.Empty()
+        for(arg <- args){
+            print("load: "+arg+"...")
+            val loader=new trigonal.loader.mqo.Loader()
+            if(loader.load(arg)){
+                root.add(createVertexArray(loader))
+                println("success")
+            }
+            else{
+                println("failed")
+            }
+        }
+
+        // create camera
+        val camera=new scene.Camera(Vector3(0, 0, -800))
+        root.add(camera)
 
         // set callback
         Device.addKeyDownCallback(Keyboard.KEY_ESCAPE){
@@ -43,22 +65,24 @@ object App {
             ()=>Device.close()
         }
 
+        // main loop
         while(Device.isRunning){
             // update frame
             Device.keyDownDispatch()
-            cube.update()
+            root.update()
 
             // draw
             Device.clear()
 
-            GL11.glTranslatef(0.0f, 0.0f, -10.0f)
-            cube.draw()
+            camera.apply()
+            root.draw()
 
             // update
             Device.update()
             Device.sync(60)
         }
 
+        // clean up
         Device.destroy()
     }
 }
