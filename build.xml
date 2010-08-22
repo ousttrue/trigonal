@@ -3,6 +3,7 @@
 
     <property name="src" value="src" />
     <property name="classes" value="classes" />
+    <property name="docs" value="docs" />
     <property name="scala.lib" value="T:/scala-2.8.0.final/lib/scala-library.jar" />
     <property name="scala.compiler" value="T:/scala-2.8.0.final/lib/scala-compiler.jar" />
     <property name="lwjgl" value="T:/java/lwjgl-2.5"/>
@@ -57,6 +58,24 @@
             <arg path="${model}" />
         </java>
     </target>
+
+    <target name="docs" depends="init">
+        <mkdir dir="${docs}"/>
+        <scaladoc
+            srcdir="${src}"
+            destdir="${docs}"
+            deprecation="yes" unchecked="yes"
+            >
+            <classpath>
+                <pathelement path="${scala.lib}" />
+                <fileset dir="${lwjgl}/jar">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+            <include name="**/*.scala"/>
+        </scaladoc>
+    </target>
+
     <target name="clean">
         <delete dir="${classes}"/>
     </target>
