@@ -4,8 +4,6 @@ import trigonal.lwjgl.MouseEvent
 import trigonal.lwjgl.MouseDrag
 import trigonal.lwjgl.MouseWheel
 import trigonal.scene
-
-import org.lwjgl.opengl.GL11
 import org.lwjgl.input.Keyboard;
 
 object App {
@@ -56,13 +54,11 @@ object App {
             // update frame
             Device.dispatch()
             root.update()
-
-            // draw
+            // clear
             Device.clear()
-
+            // draw
             camera.apply()
             root.draw()
-
             // update
             Device.update()
             Device.sync(60)
