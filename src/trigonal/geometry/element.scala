@@ -3,7 +3,7 @@ package trigonal.geometry
 /**
  * geometry
  */
-class Vector2(x :Float, y :Float)
+class Vector2(val x :Float, val y :Float)
 object Vector2 {
     def apply(x :Float, y :Float) :Vector2=new Vector2(x, y)
     def apply(
@@ -47,6 +47,11 @@ object RGBA {
 }
 
 /**
+ * Vertex
+ */
+class Vertex(val pos :Vector3, val uv :Vector2)
+
+/**
  * face
  */
 abstract class Face{
@@ -88,6 +93,15 @@ extends Face {
         uv(2)==src.uv(2)
         material=src.material
     }
+    def this(i0 :Int, i1 :Int, i2 :Int, 
+            uv0 :Vector2, uv1 :Vector2, uv2 :Vector2,
+            m :Int)={
+                this(i0, i1, i2)
+                uv(0)=uv0
+                uv(1)=uv1
+                uv(2)=uv2
+                material=m
+    }
     val uv=new Array[Vector2](3)
         override def trianglate=Array(this)
 }
@@ -112,6 +126,7 @@ extends Face {
     }
     val uv=new Array[Vector2](4)
         override def trianglate=Array(
-                new Triangle(i0, i1, i2), new Triangle(i2, i3, i0))
+                new Triangle(i0, i1, i2, uv(0), uv(1), uv(2), material), 
+                new Triangle(i2, i3, i0, uv(2), uv(3), uv(0), material))
 }
 

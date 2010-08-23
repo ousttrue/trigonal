@@ -10,20 +10,21 @@ object Builder {
         val materials=loader.materials.map{
             m => Some(new scene.Material(m.name, m.color)) :Option[scene.Material]
         }
-        // create vertex buffers
+        // create vertex buffers and uv buffers
         val verticesEachMaterial=loader.materials.map{
-            _ => ArrayBuffer[Vector3]()
+            _ => ArrayBuffer[Vertex]()
         }
         if(verticesEachMaterial.isEmpty){
             // fail safe
             materials.append(None)
-            verticesEachMaterial.append(ArrayBuffer[Vector3]())
+            verticesEachMaterial.append(ArrayBuffer[Vertex]())
         }
         // distribute vertices to materials
         for(o <- loader.objects; f <- o.faces; t <- f.trianglate){
-            verticesEachMaterial(f.material).append(o.vertices(t.i0))
-            verticesEachMaterial(f.material).append(o.vertices(t.i1))
-            verticesEachMaterial(f.material).append(o.vertices(t.i2))
+            val vertices=verticesEachMaterial(f.material)
+            vertices.append(new Vertex(o.vertices(t.i0), t.uv(0)))
+            vertices.append(new Vertex(o.vertices(t.i1), t.uv(1)))
+            vertices.append(new Vertex(o.vertices(t.i2), t.uv(2)))
         }
         // create VertexArray for each material
         val top=new scene.Empty()
