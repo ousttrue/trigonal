@@ -5,10 +5,22 @@ import trigonal.geometry._
 import scala.collection.mutable.ArrayBuffer
 
 object Builder {
-    def createVertexArray(loader :trigonal.loader.mqo.Loader) :scene.Node={
+    def createVertexArray(
+            loader :trigonal.loader.mqo.Loader,
+            path :java.io.File
+            ) :scene.Node={
         // create materials 
         val materials=loader.materials.map{
-            m => Some(new scene.Material(m.name, m.color)) :Option[scene.Material]
+            m =>
+                val material=new scene.Material(m.name, m.color)
+                m.diffuseTexture match {
+                    case Some(name)=>
+                        material.texturePath=Some(
+                            new java.io.File(path, name))
+                    case None=>
+                        "no texture"
+                }
+                Some(material) :Option[trigonal.scene.Material]
         }
         // create vertex buffers and uv buffers
         val verticesEachMaterial=loader.materials.map{

@@ -20,7 +20,9 @@ object App {
             println("load: "+arg+"...")
             val loader=new trigonal.loader.mqo.Loader()
             if(loader.load(arg)){
-                root.add(trigonal.loader.mqo.Builder.createVertexArray(loader))
+                val path=(new java.io.File(arg)).getParentFile()
+                root.add(trigonal.loader.mqo.Builder.createVertexArray(
+                            loader, path))
                 println("success")
             }
             else{

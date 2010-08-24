@@ -8,8 +8,8 @@
     <property name="scala.compiler" value="T:/scala-2.8.0.final/lib/scala-compiler.jar" />
     <property name="lwjgl" value="T:/java/lwjgl-2.5"/>
 
-    <property name="model" value="T:/model/mqo/cube.mqo" />
-    <!--<property name="model" value="T:/model/mqo/KANI_NA_PAGE/060919deco/deco.mqo" />-->
+    <!--<property name="model" value="T:/model/mqo/cube.mqo" />-->
+    <property name="model" value="T:/model/mqo/KANI_NA_PAGE/060919deco/deco.mqo" />
 
     <target name="init">
         <taskdef resource="scala/tools/ant/antlib.xml">
