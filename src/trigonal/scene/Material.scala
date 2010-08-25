@@ -63,6 +63,13 @@ class Material(val name :String, val color :RGBA)
         if(!isLoaded){
             load()
         }
+        GL11.glEnable(GL11.GL_DEPTH_TEST)
+        GL11.glEnable(GL11.GL_CULL_FACE)
+        GL11.glCullFace(GL11.GL_BACK)
+        GL11.glFrontFace(GL11.GL_CW)
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glEnable(GL11.GL_BLEND);
+
         GL11.glColor4f(color.r, color.g, color.b, color.a)
         texture match {
             case Some(t)=> "tmp"

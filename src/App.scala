@@ -32,6 +32,8 @@ object App {
 
         // create camera
         val camera=new scene.Camera(800)
+        camera.resize(Device.width, Device.height)
+        camera.shift(0, -150)
 
         // set callback
         Device.addKeyboardCallback{

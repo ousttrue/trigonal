@@ -7,7 +7,6 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.glu.GLU;
 
 case class KeyboardEvent(val keyCode :Int, val isDown :Boolean)
 abstract class MouseEvent
@@ -58,18 +57,6 @@ object Device{
     }
 
     def initializeOpenGL() {
-        GL11.glEnable(GL11.GL_DEPTH_TEST)
-        GL11.glEnable(GL11.GL_CULL_FACE)
-        GL11.glCullFace(GL11.GL_BACK)
-        GL11.glFrontFace(GL11.GL_CW)
-
-        GL11.glViewport(0, 0, Device.width, Device.height);
-
-        GL11.glMatrixMode(GL11.GL_PROJECTION);
-        GL11.glLoadIdentity();
-
-        //GL11.glOrtho(0.0, Device.width, 0.0, Device.height, -100.0, 100.0);
-        GLU.gluPerspective(30, 1, 1, 1000)
     }
 
     def clear(){
