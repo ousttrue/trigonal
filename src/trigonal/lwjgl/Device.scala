@@ -59,6 +59,9 @@ object Device{
 
     def initializeOpenGL() {
         GL11.glEnable(GL11.GL_DEPTH_TEST)
+        GL11.glEnable(GL11.GL_CULL_FACE)
+        GL11.glCullFace(GL11.GL_BACK)
+        GL11.glFrontFace(GL11.GL_CW)
 
         GL11.glViewport(0, 0, Device.width, Device.height);
 

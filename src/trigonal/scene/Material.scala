@@ -18,6 +18,7 @@ class Material(val name :String, val color :RGBA)
 
     override def toString :String="<Material "+name+" "+color+")"
 
+    // ToDo reverse tga bands.
     private def loadTargaImage(path :File)=TargaReader.read(path)
     private def loadImage(path :File)=ImageIO.read(path)
 
@@ -40,11 +41,11 @@ class Material(val name :String, val color :RGBA)
             case 3 =>
                 Some(new Texture(
                         image.getWidth(), image.getHeight(), 3,
-                        buf))
+                        buf, GL12.GL_BGR))
             case 4 =>
                 Some(new Texture(
                         image.getWidth(), image.getHeight(), 4,
-                        buf))
+                        buf, EXTAbgr.GL_ABGR_EXT))
             case _ =>
                 None
         }
