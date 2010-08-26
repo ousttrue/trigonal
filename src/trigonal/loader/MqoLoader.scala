@@ -1,10 +1,11 @@
-package trigonal.loader.mqo
+package trigonal.loader
 import trigonal.geometry._
 
 import java.io.File
 import scala.io.Source
 import scala.collection.mutable.ArrayBuffer
 
+package mqo {
 ///////////////////////////////////////////////////////////////////////////////
 // Material
 ///////////////////////////////////////////////////////////////////////////////
@@ -179,11 +180,13 @@ object Object{
     }
 
 }
+}
+import mqo._
 
 ///////////////////////////////////////////////////////////////////////////////
 // Mqo Loader
 ///////////////////////////////////////////////////////////////////////////////
-class Loader {
+class MqoLoader extends Buildable {
 
     var path=""
     var pos=Vector3(0, 0, 0)
@@ -270,17 +273,15 @@ class Loader {
     }
 }
 
-object Loader {
-    def main(args :Array[String]){
-        for(arg <- args){
-            println("load: "+arg)
-            val loader=new Loader
-            if(loader.load(arg)){
-                println(loader)
-            }
-            else{
-                println("failed!")
-            }
+object MqoLoader extends Loadable {
+    override def accept(path :File)=path.toString.toLowerCase.endsWith(".mqo")
+    override def load(path :File)={
+        val loader=new MqoLoader
+        if(loader.load(path)){
+            Some(loader)
+        }
+        else{
+            None
         }
     }
 }

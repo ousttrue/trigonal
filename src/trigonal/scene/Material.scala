@@ -1,6 +1,6 @@
 package trigonal.scene
 import trigonal.geometry._
-import trigonal.loader.tga.TargaReader
+import trigonal.loader.TargaReader
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL12
 import org.lwjgl.opengl.EXTAbgr

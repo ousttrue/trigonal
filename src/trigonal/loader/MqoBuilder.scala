@@ -1,12 +1,12 @@
-package trigonal.loader.mqo
+package trigonal.loader
 
 import trigonal.scene
 import trigonal.geometry._
 import scala.collection.mutable.ArrayBuffer
 
-object Builder {
+object MqoBuilder {
     def createVertexArray(
-            loader :trigonal.loader.mqo.Loader,
+            loader :MqoLoader,
             path :java.io.File
             ) :scene.Node={
         // create materials 

@@ -1,4 +1,4 @@
-package trigonal.loader.tga;
+package trigonal.loader;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

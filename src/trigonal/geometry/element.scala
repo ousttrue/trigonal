@@ -33,6 +33,18 @@ object Vector3 {
 /**
  * color
  */
+class RGB(val r :Float, val g :Float, val b :Float){
+    override def toString="<RGB %f:%f:%f>".format(r, g, b)
+}
+object RGB {
+    def apply(r :Float, g :Float, b :Float) :RGB=new RGB(r, g, b)
+    def apply(
+            r :{def toFloat:Float}, 
+            g :{def toFloat:Float}, 
+            b :{def toFloat:Float}
+            ) :RGB=new RGB(r toFloat, g toFloat, b toFloat)
+}
+
 class RGBA(val r :Float, val g :Float, val b :Float, val a :Float){
     override def toString="<RGBA %f:%f:%f:%f>".format(r, g, b, a)
 }

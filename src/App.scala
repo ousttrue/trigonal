@@ -4,7 +4,10 @@ import trigonal.lwjgl.MouseEvent
 import trigonal.lwjgl.MouseDrag
 import trigonal.lwjgl.MouseWheel
 import trigonal.scene
+import trigonal.loader.Loader
+import trigonal.loader.Builder
 import org.lwjgl.input.Keyboard;
+import java.io.File
 
 object App {
 
@@ -18,15 +21,13 @@ object App {
         val root=new scene.Empty()
         for(arg <- args){
             println("load: "+arg+"...")
-            val loader=new trigonal.loader.mqo.Loader()
-            if(loader.load(arg)){
-                val path=(new java.io.File(arg)).getParentFile()
-                root.add(trigonal.loader.mqo.Builder.createVertexArray(
-                            loader, path))
-                println("success")
-            }
-            else{
-                println("failed")
+            Loader(new File(arg)) match {
+                case Some(buildable)=>
+                    val path=(new File(arg)).getParentFile()
+                    println(buildable)
+                    root.add(Builder(buildable, path))
+                case None=>
+                    "fail to load"
             }
         }
 
