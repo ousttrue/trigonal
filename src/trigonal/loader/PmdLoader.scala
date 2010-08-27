@@ -1,8 +1,9 @@
 package trigonal.loader
 import trigonal.geometry._
-import trigonal.scene.Node
+import trigonal.scene
 import java.io.File
 import scala.collection.mutable.ArrayBuffer
+import org.lwjgl.BufferUtils
 
 
 class PmdLoader extends Loader {
@@ -210,8 +211,36 @@ class PmdLoader extends Loader {
 
     override def accept(path :File)=path.toString.toLowerCase.endsWith(".pmd")
 
-    override def build(dir :File) :Option[Node]={
-        None
+    override def build(dir :File) :Option[scene.Node]={
+
+        val indexArrays=materials.map{
+            m => new scene.immutable.IndexArray(
+                    BufferUtils.createIntBuffer(m.VertexCount), 
+                    Some(new scene.Material("", m.color)))
+        }
+
+        var index=0
+        for((m, indexArray)<-materials.zip(indexArrays)){
+            for(i <-0 until m.VertexCount){
+                indexArray.indices.put(indices(index))
+                index+=1
+            }
+            indexArray.indices.rewind()
+        }
+
+        val positions=BufferUtils.createFloatBuffer(vertices.length*3)
+        val uvArray=BufferUtils.createFloatBuffer(vertices.length*2)
+        for(v <- vertices){
+            positions.put(v.pos.x)
+            positions.put(v.pos.y)
+            positions.put(v.pos.z)
+            uvArray.put(v.uv.x)
+            uvArray.put(v.uv.y)
+        }
+        positions.rewind()
+        uvArray.rewind()
+        Some(new scene.immutable.IndexedVertexArray(
+                    positions, uvArray, indexArrays))
     }
 }
 

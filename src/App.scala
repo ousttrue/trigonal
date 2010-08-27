@@ -21,7 +21,9 @@ object App {
         for(arg <- args){
             println("load: "+arg+"...")
             Loader.createNode(new File(arg)) match {
-                case Some(node)=>root.add(node)
+                case Some(node)=>
+                    root.add(node)
+                    println("loaded: "+arg)
                 case None=>"fail to load"
             }
         }
@@ -29,7 +31,7 @@ object App {
         // create camera
         val camera=new scene.Camera(800)
         camera.resize(Device.width, Device.height)
-        camera.shift(0, -150)
+        //camera.shift(0, -150)
 
         // set callback
         Device.addKeyboardCallback{
