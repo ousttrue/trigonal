@@ -2,31 +2,26 @@ package trigonal.loader
 import java.io.File
 import trigonal.scene.Node
 
-abstract class Loadable {
+abstract class Loader {
     def accept(path :File) :Boolean
-    def load(path :File) :Option[Buildable]
+    def load(path :File) :Boolean
+    def build(dir :File) :Option[Node]
 }
 
-abstract class Buildable
-
 object Loader {
-    def apply(path :File) :Option[Buildable]={
-        for(l <- Array(MqoLoader, PmdLoader); if(l.accept(path))){
-            l.load(path) match {
-                case Some(buildable)=> return Some(buildable)
-                case None=>"fail to load"
+    val loaders=Array(new MqoLoader, new PmdLoader)
+
+    def createNode(path :File) :Option[Node]={
+        val dir=path.getParentFile()
+        for(l <- loaders; if(l.accept(path))){
+            if(l.load(path)){
+                l.build(dir) match {
+                    case Some(node)=> return Some(node)                    
+                    case None=> "fail to build"
+                }
             }
         }
         None
-    }
-}
-
-object Builder {
-    def apply(src :Buildable, path :File) :Node={
-        src match {
-            case l :MqoLoader => MqoBuilder.createVertexArray(l, path)
-            case l :PmdLoader => PmdBuilder.createVertexArray(l, path)
-        }
     }
 }
 
