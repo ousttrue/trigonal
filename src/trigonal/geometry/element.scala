@@ -12,7 +12,9 @@ object Vector2 {
             ) :Vector2=new Vector2(x toFloat, y toFloat)
 }
 
-class Vector3(val x :Float, val y :Float, val z :Float)
+class Vector3(val x :Float, val y :Float, val z :Float){
+    override def toString="[%f %f %f]".format(x, y, z)
+}
 object Vector3 {
     def apply(x :Float, y :Float, z :Float) :Vector3=new Vector3(x, y, z)
     def apply(

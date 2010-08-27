@@ -29,7 +29,7 @@ object App {
         }
 
         // create camera
-        val camera=new scene.Camera(800)
+        val camera=new scene.Camera(300)
         camera.resize(Device.width, Device.height)
         //camera.shift(0, -150)
 

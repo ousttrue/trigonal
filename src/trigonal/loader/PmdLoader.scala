@@ -81,8 +81,10 @@ class PmdLoader extends Loader {
         // vertices
         val vertexCount=io.getDWORD()
         for(i <- 0 until vertexCount){
+            val pos=io.getVector3()
+            val normal=io.getVector3()
             vertices.append(new Vertex(
-                io.getVector3(), io.getVector3(), io.getVector2(),
+                pos, normal, io.getVector2(),
                 io.getWORD(), io.getWORD(), io.get(), io.get()
                 ))
         }
@@ -216,7 +218,9 @@ class PmdLoader extends Loader {
         val indexArrays=materials.map{
             m => new scene.immutable.IndexArray(
                     BufferUtils.createIntBuffer(m.VertexCount), 
-                    Some(new scene.Material("", m.color)))
+                    //Some(new scene.Material("", m.color))
+                    None
+                    )
         }
 
         var index=0

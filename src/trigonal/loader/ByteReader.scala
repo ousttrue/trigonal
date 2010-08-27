@@ -4,6 +4,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.nio.charset.Charset
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 
 class ByteReader(val path :File){
@@ -13,7 +14,7 @@ class ByteReader(val path :File){
     val io=new FileInputStream(path)
     io.read(buf)
     io.close()
-    val bb=ByteBuffer.wrap(buf)
+    val bb=ByteBuffer.wrap(buf).order(ByteOrder.LITTLE_ENDIAN)
 
     def pos :Int=bb.position
     def isEnd :Boolean=bb.position>=bb.capacity
@@ -41,7 +42,12 @@ class ByteReader(val path :File){
     }
     def getFloat() :Float=bb.getFloat()
     def getVector2() :Vector2=Vector2(getFloat(), getFloat())
-    def getVector3() :Vector3=Vector3(getFloat(), getFloat(), getFloat())
+    def getVector3() :Vector3={
+        val x=getFloat()
+        val y=getFloat()
+        val z=getFloat()
+        Vector3(x, y, z)
+    }
     def getRGB() :RGB=RGB(getFloat(), getFloat(), getFloat())
     def getRGBA() :RGBA=RGBA(getFloat(), getFloat(), getFloat(), getFloat())
 }
