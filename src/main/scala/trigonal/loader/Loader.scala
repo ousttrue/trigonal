@@ -5,23 +5,19 @@ import trigonal.scene.Node
 abstract class Loader {
     def accept(path :File) :Boolean
     def load(path :File) :Boolean
-    def build(dir :File) :Option[Node]
+    def build(dir :File) :Any
 }
 
 object Loader {
-    val loaders=Array(new MqoLoader, new PmdLoader)
+    val loaders=Array(new MqoLoader, new PmdLoader, new VmdLoader)
 
-    def createNode(path :File) :Option[Node]={
+    def load(path :File) :Any={
         val dir=path.getParentFile()
         for(l <- loaders; if(l.accept(path))){
             if(l.load(path)){
-                l.build(dir) match {
-                    case Some(node)=> return Some(node)                    
-                    case None=> "fail to build"
-                }
+                return l.build(dir)
             }
         }
-        None
     }
 }
 

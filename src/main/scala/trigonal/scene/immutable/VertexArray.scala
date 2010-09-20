@@ -15,9 +15,6 @@ extends Node
 {
     val vertexCount=positions.capacity/3
 
-    override def updateSelf(){
-    }
-
     override def drawSelf(){
         material match {
             case Some(m)=>m.begin()

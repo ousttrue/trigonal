@@ -1,12 +1,13 @@
 package trigonal.lwjgl
 import scala.collection.mutable.ArrayBuffer
 
-import org.lwjgl.input.Controller;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
-import org.lwjgl.opengl.GL11;
+import org.lwjgl.input.Controller
+import org.lwjgl.input.Keyboard
+import org.lwjgl.input.Mouse
+import org.lwjgl.opengl.Display
+import org.lwjgl.opengl.DisplayMode
+import org.lwjgl.opengl.GL11
+import org.lwjgl.util.Timer
 
 case class KeyboardEvent(val keyCode :Int, val isDown :Boolean)
 abstract class MouseEvent
@@ -18,6 +19,7 @@ object Device{
     var isClose=false
     val keyboardCallbacks=ArrayBuffer[PartialFunction[KeyboardEvent, Unit]]()
     val mouseCallbacks=ArrayBuffer[PartialFunction[MouseEvent, Unit]]()
+    val timer=new Timer;
 
     // mouse status
     var mouse0=false
@@ -28,8 +30,10 @@ object Device{
 
     def isRunning= !isClose && !Display.isCloseRequested
     def isActive=Display.isActive
-    def update(){ Display.update() }
-    def sync(fps :Int){ Display.sync(fps) }
+    def sync(fps :Int){ 
+        Display.update()
+        Display.sync(fps) 
+    }
     def width=Display.getDisplayMode.getWidth
     def height=Display.getDisplayMode.getHeight
     def close(){ isClose=true }
@@ -82,7 +86,7 @@ object Device{
         }
     }
 
-    def dispatch(){
+    def dispatch() :Int={
         // keyboard
         while(Keyboard.next()){
             val event=KeyboardEvent(
@@ -120,6 +124,9 @@ object Device{
                    mouse_y=y
            }
         }
+
+        Timer.tick()
+        (timer.getTime() * 1000).floor.round
     }
 }
 

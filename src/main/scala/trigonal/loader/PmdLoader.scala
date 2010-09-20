@@ -7,46 +7,45 @@ import org.lwjgl.BufferUtils
 
 
 class PmdLoader extends Loader {
-
     // params
     var version=0.0f
-    var name=""
-    var comment=""
+    var name=ByteString("")
+    var comment=ByteString("")
     class Vertex(val pos :Vector3, val normal :Vector3, val uv :Vector2,
-            b0 :Int, b1 :Int, w0 :Int, flag :Int)
+            val b0 :Int, val b1 :Int, val w0 :Int, val flag :Int)
     val vertices=ArrayBuffer[Vertex]()
     val indices=ArrayBuffer[Int]()
     class Material(val color :RGBA, 
             val specularity :Float, val specular :RGB,
             val ambient :RGB, val toon_index :Int,
             val flag :Int, val VertexCount: Int,
-            val texture :String)
+            val texture :ByteString)
     val materials=ArrayBuffer[Material]()
-    class Bone(val name :String,
+    class Bone(val name :ByteString,
         val parentIndex :Int, val tailIndex :Int,
         val boneType :Int, val ikIndex :Int, val pos :Vector3){
-        var englishName=""
+        var englishName=ByteString("")
     }
     val bones=ArrayBuffer[Bone]()
     class IK(val targetIndex :Int, val effectorIndex :Int,
         val iterrations :Int, val weight :Float, val children :Seq[Int])
     val iks=ArrayBuffer[IK]()
-    class Morph(val name :String, val morphType :Int,
+    class Morph(val name :ByteString, val morphType :Int,
         val offsets :Seq[(Int, Vector3)]){
-        var englishName=""
+        var englishName=ByteString("")
     }
     val morphs=ArrayBuffer[Morph]()
-    var englishName=""
-    var englishComment=""
-    class BoneGroup(val name :String){
-        var englishName=""
+    var englishName=ByteString("")
+    var englishComment=ByteString("")
+    class BoneGroup(val name :ByteString){
+        var englishName=ByteString("")
     }
     val boneGroups=ArrayBuffer[BoneGroup]()
     class ToonTexture{
-        var name=""
+        var name=ByteString("")
     }
     val toonTextures=for(i <-0 until 10) yield new ToonTexture
-    class RigidBody(val name :String, val boneIndex :Int,
+    class RigidBody(val name :ByteString, val boneIndex :Int,
         val group :Int, val collision :Int,
         val shape :Int, val width :Float, val height :Float, val depth :Float,
         val pos :Vector3, val rot :Vector3,
@@ -57,7 +56,7 @@ class PmdLoader extends Loader {
         val d :Float,
         val rigidBodyType :Int)
     val rigidBodies=ArrayBuffer[RigidBody]()
-    class Constraint(val name :String,
+    class Constraint(val name :ByteString,
         val rigidBodyA :Int, val rigidBodyB :Int,
         val pos :Vector3, val rot :Vector3,
         val moveLimit1 :Vector3, val moveLimit2 :Vector3,
@@ -162,12 +161,10 @@ class PmdLoader extends Loader {
         // englishMorph
         for(m <- morphs.tail){
             m.englishName=io.getString(20)
-            println(m.englishName)
         }
         // englishBoneGroup
         for(g <- boneGroups){
             g.englishName=io.getString(50)
-            println(g.englishName)
         }
         if(io.isEnd){
             return true
@@ -175,7 +172,6 @@ class PmdLoader extends Loader {
         // toonTextures
         for(t <- toonTextures){
             t.name=io.getString(100)
-            println(t.name)
         }
         if(io.isEnd){
             println("no rigid bodies")
@@ -213,8 +209,9 @@ class PmdLoader extends Loader {
 
     override def accept(path :File)=path.toString.toLowerCase.endsWith(".pmd")
 
-    override def build(dir :File) :Option[scene.Node]={
+    override def build(dir :File) :Any={
 
+        // materials
         val indexArrays=materials.map{
             m => new scene.immutable.IndexArray(
                     BufferUtils.createIntBuffer(m.VertexCount), 
@@ -223,6 +220,7 @@ class PmdLoader extends Loader {
                     )
         }
 
+        // index array
         var index=0
         for((m, indexArray)<-materials.zip(indexArrays)){
             for(i <-0 until m.VertexCount){
@@ -232,19 +230,40 @@ class PmdLoader extends Loader {
             indexArray.indices.rewind()
         }
 
+        // vertex array
         val positions=BufferUtils.createFloatBuffer(vertices.length*3)
         val uvArray=BufferUtils.createFloatBuffer(vertices.length*2)
-        for(v <- vertices){
+        val boneWeights=new Array[(Vector3, Int, Int, Float)](vertices.length)
+        for((v, i) <- vertices.zipWithIndex){
             positions.put(v.pos.x)
             positions.put(v.pos.y)
             positions.put(v.pos.z)
             uvArray.put(v.uv.x)
             uvArray.put(v.uv.y)
+            boneWeights(i)=(v.pos, v.b0, v.b1, v.w0)
         }
         positions.rewind()
         uvArray.rewind()
-        Some(new scene.immutable.IndexedVertexArray(
-                    positions, uvArray, indexArrays))
+
+        // skeleton, motion
+        val boneBuilder=new scene.BoneBuilder("root", Vector3.zero)
+        val sceneBones=ArrayBuffer[scene.BoneBuilder]()
+        for(b <- bones){
+            sceneBones.append(new scene.BoneBuilder(b.name.toString, b.pos))
+        }
+        for((b, bone) <- bones.zip(sceneBones)){
+            if(b.parentIndex==0xFFFF){
+                boneBuilder.add(bone)
+            }
+            else{
+                sceneBones(b.parentIndex).add(bone)
+            }
+        }
+        val skeleton=new scene.Skeleton(boneBuilder.result)
+
+        new scene.immutable.SkeletalIndexedVertexArray(
+                    positions, uvArray, indexArrays, 
+                    boneWeights, skeleton)
     }
 }
 

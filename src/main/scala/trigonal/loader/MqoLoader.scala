@@ -7,7 +7,6 @@ import scala.io.Source
 import scala.collection.mutable.ArrayBuffer
 
 class MqoLoader extends Loader {
-
     class Material(var name :String) {
         var shader=3
         var color=new RGBA(0.5f, 0.5f, 0.5f, 1.0f)
@@ -257,7 +256,7 @@ class MqoLoader extends Loader {
         }
     }
 
-    override def build(dir :File) :Option[Node]={
+    override def build(dir :File) :Any={
         // create materials 
         val materials=mqoMaterials.map{
             m =>
@@ -294,7 +293,7 @@ class MqoLoader extends Loader {
             top.add(scene.immutable.VertexArray(vertices, material))
         }
 
-        Some(top)
+        top
     }
 }
 
