@@ -35,13 +35,13 @@ define "trigonal" do
     extracted.target.invoke
   end
 
-  lwjgl_jar=file('target/lwjgl-2.5/jar/lwjgl.jar'=>:extract)
+  lwjgl_jar=file('target/lwjgl-2.5/jar/lwjgl.jar'=>"extract")
   lwjgl=artifact(LWJGL).from(lwjgl_jar)
 
-  lwjgl_util_jar=file('target/lwjgl-2.5/jar/lwjgl_util.jar'=>:extract)
+  lwjgl_util_jar=file('target/lwjgl-2.5/jar/lwjgl_util.jar'=>"extract")
   lwjgl_util=artifact(LWJGL_UTIL).from(lwjgl_util_jar)
 
-  task :run => [compile, :extract] do
+  task :run => [compile, "extract"] do
     cp = Buildr.artifacts(SPECS+[SCALA_LIB]).each(&:invoke).map(&:name).join(File::PATH_SEPARATOR)
     lib="target/lwjgl-2.5/native/linux"
     cmd="java -cp target/classes:#{cp} -Djava.library.path=#{lib} App miku/miku01.mqo"
