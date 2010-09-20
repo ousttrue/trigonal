@@ -2,13 +2,14 @@ package trigonal.scene
 import trigonal.geometry._
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.Map
+import org.lwjgl.opengl.GL11
 
 class BoneBuilder(val name :String, val pos :Vector3) {
     val children=ArrayBuffer[BoneBuilder]()
     var localPos=pos
     def add(child :BoneBuilder)={
         children+=(child)
-        child.localPos=pos-child.pos
+        child.localPos=child.pos-pos
         child
     }
     def result() :Bone={
@@ -21,7 +22,7 @@ val localPos :Vector3, val inversedPos :Vector3,
 val children :Array[Bone]) 
 extends Traversable[Bone]{
     var channel :Option[Channel[Key]]=None
-    var transform=Transform()
+    var transform=Transform(localPos)
     var accumulate=Transform()
     override def toString()="<Bone %s %s>".format(name)
     override def foreach[U](f: (trigonal.scene.Bone) => U){
@@ -51,9 +52,28 @@ extends Traversable[Bone]{
     }
     def getCalced=Transform(-inversedPos) * accumulate
     def setChannel(someChannel :Option[Channel[Key]]){ channel=someChannel }
+
+    def draw(){
+        GL11.glPushMatrix()
+        GL11.glBegin(GL11.GL_LINES)
+        GL11.glVertex3f(0.0f, 0.0f, 0.0f)
+        GL11.glVertex3f(transform.pos.x, transform.pos.y, transform.pos.z)
+        GL11.glEnd()
+        GL11.glMultMatrix(transform.matrix)
+        GL11.glPointSize(2);
+        GL11.glBegin(GL11.GL_POINTS)
+        GL11.glVertex3f(0.0f, 0.0f, 0.0f)
+        GL11.glEnd()
+
+        children.foreach(_.draw())
+
+        GL11.glPopMatrix()
+    }
 }
 
-class Skeleton(val root :Bone){
+class Skeleton(val root :Bone)
+extends Node
+{
     val bones=ArrayBuffer[Bone]()
     val boneMap=Map[String, Bone]()
     var motion :Option[Motion]=None
@@ -71,7 +91,9 @@ class Skeleton(val root :Bone){
         }
     }
 
-    def update(time :Int){
+    override def drawSelf(){ root.draw() }
+
+    override def update(time :Int){
         motion match {
             case Some(m)=>
                 val frame=m.timeToFrame(time)

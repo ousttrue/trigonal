@@ -261,9 +261,12 @@ class PmdLoader extends Loader {
         }
         val skeleton=new scene.Skeleton(boneBuilder.result)
 
+        /*
         new scene.immutable.SkeletalIndexedVertexArray(
                     positions, uvArray, indexArrays, 
                     boneWeights, skeleton)
+                    */
+        skeleton
     }
 }
 

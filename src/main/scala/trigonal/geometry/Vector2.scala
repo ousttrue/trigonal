@@ -1,4 +1,6 @@
 package trigonal.geometry
+import org.lwjgl.BufferUtils
+
 
 /**
  * geometry
@@ -87,6 +89,32 @@ object Quaternion {
 }
 
 class Transform(val rot :Matrix3, val pos :Vector3) {
+    val matrix=BufferUtils.createFloatBuffer(16)
+
+    matrix.put(rot.data(0))
+    matrix.put(rot.data(1))
+    matrix.put(rot.data(2))
+    matrix.put(0.0f)
+    matrix.put(rot.data(3))
+    matrix.put(rot.data(4))
+    matrix.put(rot.data(5))
+    matrix.put(0.0f)
+    matrix.put(rot.data(6))
+    matrix.put(rot.data(7))
+    matrix.put(rot.data(8))
+    matrix.put(0.0f)
+    matrix.put(pos.x)
+    matrix.put(pos.y)
+    matrix.put(pos.z)
+    matrix.put(1.0f)
+
+    matrix.rewind()
+
+    override def toString="[%f, %f, %f, %f]\n[%f, %f, %f, %f]\n[%f, %f, %f, %f]\n[%f, %f, %f, %f]\n".format(
+      matrix.get(0), matrix.get(1), matrix.get(2), matrix.get(3), 
+      matrix.get(4), matrix.get(5), matrix.get(6), matrix.get(7), 
+      matrix.get(8), matrix.get(9), matrix.get(10), matrix.get(11), 
+      matrix.get(12), matrix.get(13), matrix.get(14), matrix.get(15))
     def apply(v :Vector3)=v.apply(rot)+pos
     def * (other :Transform)=new Transform(
             rot * other.rot, pos.apply(other.rot)+other.pos)
