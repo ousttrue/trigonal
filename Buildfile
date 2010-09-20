@@ -1,4 +1,5 @@
 #Buildr.settings.build['scala.version'] = "2.8.0.Beta1"
+# coding: utf-8
 Buildr.settings.build['scala.version'] = "2.8.0"
 require 'buildr/scala'
 
@@ -44,7 +45,8 @@ define "trigonal" do
   task :run => [compile, "extract"] do
     cp = Buildr.artifacts(SPECS+[SCALA_LIB]).each(&:invoke).map(&:name).join(File::PATH_SEPARATOR)
     lib="target/lwjgl-2.5/native/linux"
-    cmd="java -cp target/classes:#{cp} -Djava.library.path=#{lib} App miku/miku01.mqo"
+    #cmd="java -cp target/classes:#{cp} -Djava.library.path=#{lib} App miku/miku01.mqo"
+    cmd="java -cp target/classes:#{cp} -Djava.library.path=#{lib} App official/miku.pmd motion/mikumiku.vmd"
     p cmd
     system cmd
   end
